@@ -1,21 +1,80 @@
+
+<script src="https://cdn.staticfile.org/vue/3.2.36/vue.global.min.js"></script>
+
 <div id="app">
-  <h2>{{title}}</h2>
-  <input type="text" v-model="title" />
-  <ul>
-    <li v-for="todo in todos">{{todo}}</li>
+
+  <input type="text" v-model="title" @keydown.enter="addTodo">
+  <ul v-if="todos.length">
+    <li v-for="todo in todos">
+      <input type="checkbox" v-model="todo.done">
+      <span :class="{done:todo.done}">{{todo.title}}</span>
+    </li>
   </ul>
+  <div v-else> 
+    no data 
+  </div>
+
+  <div>
+    全选<input type="checkbox" v-model="allDone">
+    <span >
+      {{active}} / {{all}}
+    </span>
+  </div>
+  <button v-if="active<all" @click="clear">clear</button>
 </div>
 
-<script src="https://unpkg.com/vue@next"></script>
+
 <script>
-  const App = {
-    data() {
-      return {
-        title: "", // 定义一个数据
-        todos: ["吃饭", "睡觉"],
-      };
+const App = {
+  data() {
+    return {
+      title: "", // 定义一个数据
+      todos:[
+        {title:'吃饭',done:false},
+        {title:'睡觉',done:true}]
+    }
+  },
+  computed: {
+    active() {
+      return this.todos.filter(v=>!v.done).length
     },
-  };
-  // 启动应用
-  Vue.createApp(App).mount("#app");
+    all() {
+      return this.todos.length
+    },
+    allDone: {
+      get: function() {
+        return this.active === 0
+      },
+      set: function(val) {
+        this.todos.forEach(todo => {
+          todo.done = val 
+        });
+      }
+    }
+  },
+  methods:{
+    addTodo(){
+      this.todos.push({
+        title:this.title,
+        done:false
+      }
+      )
+      this.title = ""
+    },
+    clear() {
+      this.todos = this.todos.filter(v=>!v.done)
+    }
+  }
+}
+// 启动应用
+Vue.createApp(App).mount('#app')
 </script>
+
+
+
+<style>
+  .done{
+    color:gray;
+    text-decoration: line-through;
+  }
+</style>
